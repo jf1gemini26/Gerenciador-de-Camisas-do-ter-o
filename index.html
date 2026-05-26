@@ -2,7 +2,7 @@
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gerenciador de Pedidos e Camisas</title>
     <!-- Tailwind CSS para design moderno e responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,6 +14,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         @media print {
             .no-print {
@@ -22,52 +23,59 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-24 lg:pb-12">
 
-    <div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="max-w-5xl mx-auto px-4 py-6 lg:py-8">
         
         <!-- CAIXA DE NOTIFICAÇÃO PERSONALIZADA (Substitui o alert tradicional) -->
-        <div id="toast-notification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-            <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 border border-slate-800">
-                <div id="toast-icon-container" class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400">
-                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+        <div id="toast-notification" class="fixed bottom-20 lg:bottom-5 right-4 left-4 lg:left-auto lg:right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center justify-between lg:justify-start gap-3 border border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div id="toast-icon-container" class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    </div>
+                    <p id="toast-message" class="text-sm font-medium"></p>
                 </div>
-                <p id="toast-message" class="text-sm font-medium"></p>
             </div>
         </div>
 
-        <!-- Cabeçalho Principal (Não sai no PDF) -->
-        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 no-print">
+        <!-- Cabeçalho Principal Desktop (Ocultado em telas pequenas) -->
+        <header class="hidden lg:flex justify-between items-center gap-4 mb-8 no-print">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Gerenciador de Camisas</h1>
                 <p class="text-slate-500 mt-1">Controle de tamanhos, pagamentos e importação/exportação de dados.</p>
             </div>
-            <div class="flex flex-wrap gap-2 w-full lg:w-auto">
-                <button onclick="openAddModal()" class="flex-1 lg:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
+            <div class="flex flex-wrap gap-2">
+                <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
                     <i data-lucide="user-plus" class="w-5 h-5"></i>
                     Adicionar Nome
                 </button>
                 
-                <!-- Input de arquivo oculto para importação de CSV -->
-                <input type="file" id="csv-file-input" accept=".csv" class="hidden" onchange="importFromCSV(event)">
-                <button onclick="triggerCSVImport()" class="flex-1 lg:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
+                <input type="file" id="csv-file-input-desktop" accept=".csv" class="hidden" onchange="importFromCSV(event)">
+                <button onclick="triggerCSVImport('desktop')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
                     <i data-lucide="file-up" class="w-5 h-5"></i>
                     Importar CSV
                 </button>
 
-                <button onclick="exportToCSV()" class="flex-1 lg:flex-none bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
+                <button onclick="exportToCSV()" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
                     <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                     Salvar em CSV
                 </button>
-                <button onclick="exportToPDF()" class="flex-1 lg:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
+                <button onclick="exportToPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm">
                     <i data-lucide="download" class="w-5 h-5"></i>
                     Salvar em PDF
                 </button>
             </div>
         </header>
 
+        <!-- Cabeçalho Compacto Mobile (Ocultado em computadores) -->
+        <header class="lg:hidden mb-6 no-print">
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Gerenciador de Camisas</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Gestão rápida de pedidos e tamanhos</p>
+        </header>
+
         <!-- ÁREA DE IMPRESSÃO / CONTEÚDO PRINCIPAL -->
-        <div id="print-area" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+        <div id="print-area" class="bg-white p-4 md:p-8 rounded-2xl shadow-sm border border-slate-100">
             
             <!-- Título do Relatório no PDF (Fica oculto no ecrã normal, aparece no PDF) -->
             <div id="pdf-header" class="hidden mb-6 text-center border-b border-slate-200 pb-4">
@@ -76,48 +84,49 @@
             </div>
 
             <!-- TABULEIRO DE MÉTRICAS (SUPERIOR) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 rounded-xl border border-blue-100">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-blue-600">Total Geral</span>
-                    <div class="text-2xl font-bold text-blue-900 mt-1" id="metric-total">R$ 0,00</div>
-                    <div class="text-xs text-blue-700 mt-1" id="metric-qty-total">0 unidades</div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6 lg:mb-8">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 p-3.5 lg:p-4 rounded-xl border border-blue-100/80">
+                    <span class="text-[10px] lg:text-xs font-semibold uppercase tracking-wider text-blue-600">Total Geral</span>
+                    <div class="text-lg lg:text-2xl font-bold text-blue-900 mt-0.5" id="metric-total">R$ 0,00</div>
+                    <div class="text-[10px] lg:text-xs text-blue-700 mt-0.5" id="metric-qty-total">0 unidades</div>
                 </div>
                 
-                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-4 rounded-xl border border-emerald-100">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-emerald-600">Total Pago</span>
-                    <div class="text-2xl font-bold text-emerald-900 mt-1" id="metric-paid">R$ 0,00</div>
-                    <div class="text-xs text-emerald-700 mt-1" id="metric-qty-paid">0 pagas</div>
+                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-3.5 lg:p-4 rounded-xl border border-emerald-100/80">
+                    <span class="text-[10px] lg:text-xs font-semibold uppercase tracking-wider text-emerald-600">Total Pago</span>
+                    <div class="text-lg lg:text-2xl font-bold text-emerald-900 mt-0.5" id="metric-paid">R$ 0,00</div>
+                    <div class="text-[10px] lg:text-xs text-emerald-700 mt-0.5" id="metric-qty-paid">0 pagas</div>
                 </div>
 
-                <div class="bg-gradient-to-br from-rose-50 to-rose-100/50 p-4 rounded-xl border border-rose-100">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-rose-600">Falta Pagar</span>
-                    <div class="text-2xl font-bold text-rose-900 mt-1" id="metric-pending">R$ 0,00</div>
-                    <div class="text-xs text-rose-700 mt-1" id="metric-qty-pending">0 pendentes</div>
+                <div class="bg-gradient-to-br from-rose-50 to-rose-100/50 p-3.5 lg:p-4 rounded-xl border border-rose-100/80">
+                    <span class="text-[10px] lg:text-xs font-semibold uppercase tracking-wider text-rose-600">Falta Pagar</span>
+                    <div class="text-lg lg:text-2xl font-bold text-rose-900 mt-0.5" id="metric-pending">R$ 0,00</div>
+                    <div class="text-[10px] lg:text-xs text-rose-700 mt-0.5" id="metric-qty-pending">0 pendentes</div>
                 </div>
 
-                <div class="bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 rounded-xl border border-slate-200">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-600 font-medium">Tamanhos</span>
-                    <div class="grid grid-cols-2 gap-x-2 mt-1 text-xs text-slate-700 font-mono">
-                        <div>P/M/G (R$40): <span class="font-bold text-slate-900" id="count-standard">0</span></div>
-                        <div>GG/XGG (R$44): <span class="font-bold text-slate-900" id="count-special">0</span></div>
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100/50 p-3.5 lg:p-4 rounded-xl border border-slate-200">
+                    <span class="text-[10px] lg:text-xs font-semibold uppercase tracking-wider text-slate-600 font-medium">Tamanhos</span>
+                    <div class="grid grid-cols-2 gap-x-1 mt-1 text-[10px] lg:text-xs text-slate-700 font-mono">
+                        <div>P/M/G: <span class="font-bold text-slate-900" id="count-standard">0</span></div>
+                        <div>GG/XG: <span class="font-bold text-slate-900" id="count-special">0</span></div>
                     </div>
                 </div>
             </div>
 
             <!-- LISTAS DE TAMANHOS (Utiliza flexbox ou grid forçado no PDF) -->
-            <div id="lists-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div id="lists-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                 
                 <!-- SEÇÃO MASCULINA -->
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <div class="space-y-3 lg:space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                        <h2 class="text-base lg:text-lg font-bold text-slate-900 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                             Tamanho Masculino
                         </h2>
                         <span class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-full font-semibold" id="badge-masc">0 itens</span>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <!-- Modo Tabela (Ocultado no Celular, Visível no Desktop/Tablet/PDF) -->
+                    <div class="hidden md:block overflow-x-auto" id="table-container-masculino">
                         <table class="w-full text-sm text-left">
                             <thead>
                                 <tr class="text-xs text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -134,19 +143,25 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Modo Cards Mobile (Visível apenas no Celular, Ocultado no Desktop/PDF) -->
+                    <div class="md:hidden space-y-2 no-print" id="cards-masculino">
+                        <!-- Preenchido dinamicamente com layouts de toque simplificados -->
+                    </div>
                 </div>
 
                 <!-- SEÇÃO FEMININA -->
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <div class="space-y-3 lg:space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                        <h2 class="text-base lg:text-lg font-bold text-slate-900 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span>
                             Tamanho Feminino
                         </h2>
                         <span class="bg-pink-50 text-pink-700 text-xs px-2.5 py-1 rounded-full font-semibold" id="badge-fem">0 itens</span>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <!-- Modo Tabela (Ocultado no Celular, Visível no Desktop/Tablet/PDF) -->
+                    <div class="hidden md:block overflow-x-auto" id="table-container-feminino">
                         <table class="w-full text-sm text-left">
                             <thead>
                                 <tr class="text-xs text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -163,6 +178,11 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Modo Cards Mobile (Visível apenas no Celular, Ocultado no Desktop/PDF) -->
+                    <div class="md:hidden space-y-2 no-print" id="cards-feminino">
+                        <!-- Preenchido dinamicamente -->
+                    </div>
                 </div>
 
             </div>
@@ -170,19 +190,41 @@
             <!-- Mensagem de lista vazia -->
             <div id="empty-state" class="hidden text-center py-12 text-slate-400">
                 <i data-lucide="clipboard-x" class="w-12 h-12 mx-auto mb-3 stroke-1 text-slate-300"></i>
-                <p>Nenhum pedido cadastrado.</p>
-                <p class="text-xs text-slate-400/80 mt-1">Clique em "Adicionar Nome" ou importe um ficheiro CSV para começar.</p>
+                <p class="text-sm font-medium">Nenhum pedido cadastrado.</p>
+                <p class="text-xs text-slate-400/80 mt-1">Toque no botão abaixo ou importe um CSV para começar.</p>
             </div>
 
         </div>
     </div>
 
+    <!-- BARRA FLUTUANTE DE OPERAÇÕES MOBILE (Exclusivo celular) -->
+    <div class="lg:hidden fixed bottom-4 left-4 right-4 z-40 no-print">
+        <div class="bg-slate-900/95 backdrop-blur-md p-2.5 rounded-2xl shadow-2xl border border-slate-800 flex items-center justify-between gap-2">
+            <button onclick="openAddModal()" class="flex-1 bg-blue-600 active:bg-blue-700 text-white py-3 px-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-all">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                Adicionar Nome
+            </button>
+            
+            <input type="file" id="csv-file-input-mobile" accept=".csv" class="hidden" onchange="importFromCSV(event)">
+            <button onclick="triggerCSVImport('mobile')" class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700 active:bg-slate-700 transition-all" title="Importar CSV">
+                <i data-lucide="file-up" class="w-4 h-4"></i>
+            </button>
+            <button onclick="exportToCSV()" class="bg-slate-800 text-white p-3 rounded-xl border border-slate-700 active:bg-slate-700 transition-all" title="Exportar CSV">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            </button>
+            <button onclick="exportToPDF()" class="bg-emerald-600 text-white p-3 rounded-xl active:bg-emerald-700 transition-all" title="Exportar PDF">
+                <i data-lucide="download" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL DE ADIÇÃO E EDIÇÃO -->
-    <div id="item-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
-        <div class="bg-white rounded-xl shadow-xl border border-slate-100 w-full max-w-md mx-4 overflow-hidden transform transition-all">
+    <div id="item-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center hidden no-print">
+        <!-- No mobile desliza suavemente como um bottom drawer -->
+        <div class="bg-white rounded-t-2xl md:rounded-xl shadow-xl border border-slate-100 w-full max-w-md overflow-hidden transform transition-all pb-8 md:pb-0">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 id="modal-title" class="text-lg font-bold text-slate-900">Novo Pedido</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -192,20 +234,21 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Nome Completo</label>
-                    <input type="text" id="form-name" required placeholder="Ex: JOÃO SILVA" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 uppercase">
+                    <!-- text-base previne zoom indesejado no iOS Safari -->
+                    <input type="text" id="form-name" required placeholder="Ex: JOÃO SILVA" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-base uppercase">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Gênero (Tamanho)</label>
-                        <select id="form-gender" required class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Gênero</label>
+                        <select id="form-gender" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-base">
                             <option value="M">Masculino</option>
                             <option value="F">Feminino</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Tamanho</label>
-                        <select id="form-size" required class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                        <select id="form-size" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-base">
                             <option value="P">P</option>
                             <option value="M">M</option>
                             <option value="G">G</option>
@@ -215,14 +258,14 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 py-2">
-                    <input type="checkbox" id="form-paid" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                <div class="flex items-center gap-3 py-2">
+                    <input type="checkbox" id="form-paid" class="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
                     <label for="form-paid" class="text-sm font-medium text-slate-700 select-none cursor-pointer">Marcar como Pago</label>
                 </div>
 
                 <div class="flex gap-2 pt-4 border-t border-slate-100">
-                    <button type="button" onclick="closeModal()" class="flex-1 border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">Salvar</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-lg font-medium hover:bg-slate-50 transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors">Salvar</button>
                 </div>
             </form>
         </div>
@@ -243,7 +286,7 @@
             }
         }
 
-        // Função para mostrar notificações customizadas sem usar o alert do browser
+        // Mostrar notificações customizadas
         function showToast(message, isSuccess = true) {
             const toast = document.getElementById('toast-notification');
             const messageEl = document.getElementById('toast-message');
@@ -285,8 +328,13 @@
             const tableMasculino = document.getElementById('table-masculino');
             const tableFeminino = document.getElementById('table-feminino');
             
+            const cardsMasculino = document.getElementById('cards-masculino');
+            const cardsFeminino = document.getElementById('cards-feminino');
+            
             tableMasculino.innerHTML = '';
             tableFeminino.innerHTML = '';
+            cardsMasculino.innerHTML = '';
+            cardsFeminino.innerHTML = '';
 
             let totalGeral = 0;
             let totalPago = 0;
@@ -327,10 +375,7 @@
                     countSpecial++;
                 }
 
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors align-middle';
-
-                // Determina o índice local dentro de cada categoria
+                // Determinar o índice local dentro de cada categoria
                 let indexNum = 0;
                 if (item.gender === 'M') {
                     mascCount++;
@@ -340,6 +385,9 @@
                     indexNum = femCount;
                 }
 
+                // 1. GERAR LINHA DA TABELA (Desktop/Tablet/PDF)
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors align-middle';
                 tr.innerHTML = `
                     <td class="py-2.5 px-2 text-center font-semibold text-slate-400 text-xs">${indexNum}</td>
                     <td class="py-2.5 font-medium text-slate-900 break-words max-w-[200px] uppercase">${item.name}</td>
@@ -373,10 +421,50 @@
                     </td>
                 `;
 
+                // 2. GERAR CARTÃO MOBILE (Celular - Fácil Toque)
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl border border-slate-100 p-3.5 flex items-center justify-between gap-3 shadow-sm hover:border-slate-200 transition-all';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0">
+                            ${indexNum}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-900 truncate uppercase text-sm">${item.name}</p>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="text-xs font-bold ${
+                                    item.size === 'GG' || item.size === 'XGG' ? 'text-amber-700' : 'text-slate-600'
+                                }">${item.size}</span>
+                                <span class="text-[10px] text-slate-300">•</span>
+                                <span class="text-xs font-medium text-slate-500">R$ ${price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="togglePayment(${item.id})" class="px-2.5 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1 transition-all ${
+                            item.paid 
+                            ? 'bg-emerald-50 border-emerald-150 text-emerald-700 active:bg-emerald-100' 
+                            : 'bg-rose-50 border-rose-150 text-rose-700 active:bg-rose-100'
+                        }">
+                            <i data-lucide="${item.paid ? 'check-circle-2' : 'circle'}" class="w-3.5 h-3.5"></i>
+                            <span>${item.paid ? 'Pago' : 'Pendente'}</span>
+                        </button>
+                        
+                        <button onclick="openEditModal(${item.id})" class="p-2 text-slate-400 active:text-blue-600 active:bg-slate-50 rounded-lg" title="Editar">
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteItem(${item.id})" class="p-2 text-slate-400 active:text-rose-600 active:bg-slate-50 rounded-lg" title="Excluir">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+
                 if (item.gender === 'M') {
                     tableMasculino.appendChild(tr);
+                    cardsMasculino.appendChild(card);
                 } else {
                     tableFeminino.appendChild(tr);
+                    cardsFeminino.appendChild(card);
                 }
             });
 
@@ -401,7 +489,7 @@
             lucide.createIcons();
         }
 
-        // Alternar estado de pagamento de forma simples e responsiva
+        // Alternar estado de pagamento
         function togglePayment(id) {
             listItems = listItems.map(item => {
                 if (item.id === id) {
@@ -434,6 +522,7 @@
             document.getElementById('item-modal').classList.remove('hidden');
         }
 
+        // Fechar modal limpo
         function closeModal() {
             document.getElementById('item-modal').classList.add('hidden');
         }
@@ -474,8 +563,12 @@
         }
 
         // Acionar a seleção de ficheiro CSV do sistema
-        function triggerCSVImport() {
-            document.getElementById('csv-file-input').click();
+        function triggerCSVImport(origin) {
+            if (origin === 'mobile') {
+                document.getElementById('csv-file-input-mobile').click();
+            } else {
+                document.getElementById('csv-file-input-desktop').click();
+            }
         }
 
         // Processamento dinâmico do ficheiro CSV carregado
@@ -580,6 +673,11 @@
 
         // Exportação para ficheiro CSV estruturado
         function exportToCSV() {
+            if (listItems.length === 0) {
+                showToast("Não é possível exportar uma planilha vazia.", false);
+                return;
+            }
+
             let csvContent = "\uFEFF"; // UTF-8 BOM para garantir acentuação correta no Excel
             csvContent += "Gênero;Nº;Nome;Tamanho;Valor;Status de Pagamento\n";
 
@@ -617,7 +715,7 @@
             showToast("Ficheiro CSV exportado com sucesso!");
         }
 
-        // Exportação excelente respeitando as margens e a orientação de página do PDF
+        // Exportação para PDF estruturado e bem formatado
         function exportToPDF() {
             if (listItems.length === 0) {
                 showToast("Não é possível exportar um relatório vazio para PDF.", false);
@@ -631,15 +729,23 @@
             const element = document.getElementById('print-area');
             const pdfHeader = document.getElementById('pdf-header');
             const listsContainer = document.getElementById('lists-container');
+            
+            // Referências de containers para alternância temporária durante a captura do PDF
+            const tableMascContainer = document.getElementById('table-container-masculino');
+            const tableFemContainer = document.getElementById('table-container-feminino');
 
             // 1. Mostrar cabeçalho exclusivo do PDF
             pdfHeader.classList.remove('hidden');
 
-            // 2. Ocultar coluna de ações em ambas as tabelas
+            // 2. Garantir que as tabelas de computador estejam visíveis para a foto do PDF
+            tableMascContainer.classList.remove('hidden');
+            tableFemContainer.classList.remove('hidden');
+
+            // 3. Ocultar coluna de ações em ambas as tabelas
             const actionColumns = document.querySelectorAll('.no-print-column');
             actionColumns.forEach(el => el.style.display = 'none');
 
-            // 3. Forçar largura fixa e grid lado-a-lado ideal durante a renderização do PDF
+            // 4. Forçar largura fixa e grid lado-a-lado ideal no PDF independente do tamanho da tela do celular
             const originalStyle = element.getAttribute('style') || '';
             const originalContainerClass = listsContainer.className;
 
@@ -648,11 +754,11 @@
             element.style.boxShadow = 'none';
             element.style.border = 'none';
             
-            // Força o grid de duas colunas lado a lado no container
+            // Força o grid de duas colunas lado a lado no container para a foto do PDF
             listsContainer.className = 'grid grid-cols-2 gap-8';
 
             const opt = {
-                margin:       [12, 12, 12, 12], // Margens de 12mm em cima, esquerda, baixo, direita
+                margin:       [12, 12, 12, 12], // Margens físicas da folha A4
                 filename:     `Relatorio_Camisas_${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
@@ -672,13 +778,26 @@
                 actionColumns.forEach(el => el.style.display = '');
                 element.setAttribute('style', originalStyle);
                 listsContainer.className = originalContainerClass;
-                showToast("Ficheiro PDF exportado com sucesso!");
+                
+                // Se a tela for pequena, re-esconder as tabelas de computador
+                if (window.innerWidth < 768) {
+                    tableMascContainer.classList.add('hidden');
+                    tableFemContainer.classList.add('hidden');
+                }
+                
+                showToast("Ficheiro PDF exportado!");
             }).catch(err => {
                 console.error("Erro ao gerar o PDF:", err);
                 pdfHeader.classList.add('hidden');
                 actionColumns.forEach(el => el.style.display = '');
                 element.setAttribute('style', originalStyle);
                 listsContainer.className = originalContainerClass;
+                
+                if (window.innerWidth < 768) {
+                    tableMascContainer.classList.add('hidden');
+                    tableFemContainer.classList.add('hidden');
+                }
+                
                 showToast("Erro ao gerar o ficheiro PDF.", false);
             });
         }
